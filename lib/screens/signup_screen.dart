@@ -91,6 +91,7 @@ class SignupScreen extends StatelessWidget {
                       'id': user.id,
                       'name': nameController.text.trim(),
                       'email': emailController.text.trim(),
+                      'password':passwordController.text.trim(),
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
