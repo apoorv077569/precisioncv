@@ -24,6 +24,9 @@ class ResumeViewModel extends ChangeNotifier {
 
   static const int maxFileSize = 2 * 1024 * 1024; // 2MB
 
+  bool isValidResume = false;
+  String resumeValidationMessage = "";
+
   /// 📄 Pick resume (Web + Mobile safe)
   Future<void> pickResume() async {
     errorMessage = null;
@@ -59,94 +62,154 @@ class ResumeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-Future<void> uploadResume() async {
-  try {
-    if (!readyToUpload || isUploading) return;
+  Future<void> uploadResume() async {
+    try {
+      if (!readyToUpload || isUploading) return;
 
-    errorMessage = null;
-    isUploading = true;
-    uploadProgress = 0.0;
-    uploadStatus = UploadStatus.uploading;
-    notifyListeners();
+      errorMessage = null;
+      isUploading = true;
+      uploadProgress = 0.0;
+      uploadStatus = UploadStatus.uploading;
+      notifyListeners();
 
-    final supabase = Supabase.instance.client;
-    final user = supabase.auth.currentUser;
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
 
-    if (user == null) {
-      throw Exception("User not logged in");
+      if (user == null) {
+        throw Exception("User not logged in");
+      }
+
+      final filePath =
+          '${user.id}/resume_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+      // 1️⃣ Get signed upload URL
+      final signedResponse = await supabase.storage
+          .from('resume')
+          .createSignedUploadUrl(filePath);
+
+      final dio = Dio();
+
+      // 2️⃣ Upload ONLY ONCE using PUT
+      await dio.put(
+        signedResponse.signedUrl,
+        data: kIsWeb ? Stream.value(selectedBytes!) : selectedFile!.openRead(),
+        options: Options(headers: {'Content-Type': 'application/pdf'}),
+        onSendProgress: (sent, total) {
+          if (total > 0) {
+            uploadProgress = sent / total;
+            notifyListeners();
+          }
+        },
+      );
+
+      isUploading = false;
+      readyToUpload = false;
+      uploadStatus = UploadStatus.success;
+      notifyListeners();
+    } catch (e) {
+      isUploading = false;
+      uploadStatus = UploadStatus.error;
+      errorMessage = e.toString();
+      notifyListeners();
     }
-
-    final filePath =
-        '${user.id}/resume_${DateTime.now().millisecondsSinceEpoch}.pdf';
-
-    // 1️⃣ Get signed upload URL
-    final signedResponse = await supabase.storage
-        .from('resume')
-        .createSignedUploadUrl(filePath);
-
-    final dio = Dio();
-
-    // 2️⃣ Upload ONLY ONCE using PUT
-    await dio.put(
-      signedResponse.signedUrl,
-      data: kIsWeb
-          ? Stream.value(selectedBytes!)
-          : selectedFile!.openRead(),
-      options: Options(
-        headers: {'Content-Type': 'application/pdf'},
-      ),
-      onSendProgress: (sent, total) {
-        if (total > 0) {
-          uploadProgress = sent / total;
-          notifyListeners();
-        }
-      },
-    );
-
-
-    isUploading = false;
-    readyToUpload = false;
-    uploadStatus = UploadStatus.success;
-    notifyListeners();
-  } catch (e) {
-    isUploading = false;
-    uploadStatus = UploadStatus.error;
-    errorMessage = e.toString();
-    notifyListeners();
   }
-}
-
 
   void calculateAtsScore() {
-    int score = 0;
-    if (fileName != null) {
-      score += 20;
+    atsScore = 0;
+    int structureScore = 0;
+    int formattingScore = 0;
+    int fileQualityScore = 0;
+
+    if (!validateResume()) {
+      atsFeedback = resumeValidationMessage;
+      notifyListeners();
+      return;
     }
+
+    // resume validation
+    atsScore += 20;
+    int size = 0;
     if (selectedBytes != null) {
-      if (selectedBytes!.length < 1024 * 1024) {
-        score += 20;
-      }
+      size = selectedBytes!.length;
     } else if (selectedFile != null) {
-      final size = selectedFile!.lengthSync();
-      if (size < 1024 * 1024) {
-        score += 20;
-      }
+      size = selectedFile!.lengthSync();
     }
-    // keyword match
-    score += 30;
 
-    // formatting score
-    score += 30;
+    if (size >= 100 * 1024 && size <= 600 * 1024) {
+      structureScore = 25;
+    } else if (size <= 900 * 1024) {
+      structureScore = 18;
+    } else {
+      structureScore = 10;
+    }
+    atsScore += structureScore;
 
-    atsScore += score;
+    if (size <= 700 * 1024) {
+      formattingScore = 25;
+    } else {
+      formattingScore = 15;
+    }
+    atsScore += formattingScore;
 
-    if(score >= 80){
-      atsFeedback = "Excellent Resume ";
-    }else if(score >=60){
-      atsFeedback = "Good Resume, minor improvemets needed";
-    }else{
-      atsFeedback = "Resume needs improvements";
+    final name = fileName!.toLowerCase();
+
+    if (name.contains('resume') || name.contains('cv')) {
+      fileQualityScore = 30;
+    } else {
+      fileQualityScore = 20;
+    }
+    atsScore += fileQualityScore;
+
+    // cap score
+    atsScore = atsScore.clamp(0, 100);
+
+    if (atsScore >= 85) {
+      atsFeedback = "Excellent ATS-Friendly resume";
+    } else if (atsScore >= 70) {
+      atsFeedback = "Good Resume, minor ATS improvement recommended";
+    } else if (atsScore >= 50) {
+      atsFeedback = "Average resume, needs optimization";
+    } else {
+      atsFeedback = "Poor ATS compatibility - revise resume";
     }
     notifyListeners();
+  }
+
+  bool validateResume() {
+    if (fileName == null) {
+      resumeValidationMessage = "No file selected";
+      return false;
+    }
+    final name = fileName!.toLowerCase();
+
+    final resumeKeyWords = [
+      'resume',
+      'cv',
+      'curriculum',
+      'profile',
+      'bio',
+      'bio_data',
+      'bio-data',
+    ];
+
+    final containsResumeKeyword = resumeKeyWords.any((k) => name.contains(k));
+
+    if (!containsResumeKeyword) {
+      resumeValidationMessage = "Upload file does not look like a resume";
+      return false;
+    }
+    int size = 0;
+    if (selectedBytes != null) {
+      size = selectedBytes!.length;
+    } else if (selectedFile != null) {
+      size = selectedFile!.lengthSync();
+    }
+    if (size < 50 * 1024 || size > 2 * 1024 * 1024) {
+      resumeValidationMessage = "File size is not typical for a resume";
+      return false;
+    }
+    resumeValidationMessage = "valid resume detected";
+    isValidResume = true;
+    return true;
   }
 }
