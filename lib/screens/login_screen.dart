@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:precisioncv/screens/signup_screen.dart';
+import 'package:precisioncv/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'upload_screen.dart';
 
@@ -11,6 +12,8 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final email = TextEditingController();
     final password = TextEditingController();
+    final auth = AuthService();
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -70,18 +73,21 @@ class LoginScreen extends StatelessWidget {
             FilledButton(
               onPressed: () async {
                 try{
-                await Supabase.instance.client.auth.signInWithPassword(
-                  email: email.text.trim(),
-                  password: password.text.trim(),
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UploadScreen()),
-                );
-                }catch(_){
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Login Failed")),
+                  await auth.login(
+                    email: email.text.trim(),
+                    password: password.text.trim(),
                   );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Login Successfull")),
+                  );
+
+                  Navigator.pushReplacement(context, 
+                  MaterialPageRoute(builder: (_)=> const UploadScreen()),
+                  );
+                }catch(e){
+                  ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               },
               child: const Text("Login"),

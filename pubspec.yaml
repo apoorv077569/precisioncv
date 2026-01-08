@@ -32,6 +32,7 @@ dependencies:
   provider: ^6.1.2
   supabase_flutter: ^2.5.0
   dio: ^5.4.0
+  crypto: ^3.0.3
 
 
 

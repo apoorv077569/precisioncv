@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:precisioncv/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_screen.dart';
 
@@ -11,6 +12,7 @@ class SignupScreen extends StatelessWidget {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
+    final authservice = AuthService();
 
     return Scaffold(
       body: Padding(
@@ -74,43 +76,22 @@ class SignupScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             FilledButton(
-              onPressed: () async {
-                try {
-                  final response =
-                      await Supabase.instance.client.auth.signUp(
+              onPressed: () async{
+                try{
+                  await authservice.signup(
+                    name: nameController.text.trim(),
                     email: emailController.text.trim(),
                     password: passwordController.text.trim(),
                   );
 
-                  final user = response.user;
-
-                  if (user != null) {
-                    await Supabase.instance.client
-                        .from('profiles')
-                        .insert({
-                      'id': user.id,
-                      'name': nameController.text.trim(),
-                      'email': emailController.text.trim(),
-                      'password':passwordController.text.trim(),
-                    });
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Account created successfully"),
-                      ),
-                    );
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
-                      ),
-                    );
-                  }
-                } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.toString())),
+                    const SnackBar(content: Text("Signup Successfull")),
                   );
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=> const LoginScreen()),
+                  );
+                }catch(e){
+                  ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content:Text(e.toString())));
                 }
               },
               child: const Text("Signup"),
