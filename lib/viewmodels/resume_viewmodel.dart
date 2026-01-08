@@ -27,6 +27,8 @@ class ResumeViewModel extends ChangeNotifier {
   bool isValidResume = false;
   String resumeValidationMessage = "";
 
+  List<String> improvementSuggestions = [];
+
   /// 📄 Pick resume (Web + Mobile safe)
   Future<void> pickResume() async {
     errorMessage = null;
@@ -119,6 +121,7 @@ class ResumeViewModel extends ChangeNotifier {
     int structureScore = 0;
     int formattingScore = 0;
     int fileQualityScore = 0;
+    improvementSuggestions.clear();
 
     if (!validateResume()) {
       atsFeedback = resumeValidationMessage;
@@ -141,6 +144,9 @@ class ResumeViewModel extends ChangeNotifier {
       structureScore = 18;
     } else {
       structureScore = 10;
+      improvementSuggestions.add(
+        "Keep resume length 1-2 pages for better ATS Performance",
+      );
     }
     atsScore += structureScore;
 
@@ -148,6 +154,9 @@ class ResumeViewModel extends ChangeNotifier {
       formattingScore = 25;
     } else {
       formattingScore = 15;
+      improvementSuggestions.add(
+        "Avoid heavy graphics,tables,or images in resume",
+      );
     }
     atsScore += formattingScore;
 
@@ -157,6 +166,9 @@ class ResumeViewModel extends ChangeNotifier {
       fileQualityScore = 30;
     } else {
       fileQualityScore = 20;
+      improvementSuggestions.add(
+        "Rename file using standrard format like 'Jon_Doe_Resume.pdf'",
+      );
     }
     atsScore += fileQualityScore;
 
@@ -172,6 +184,12 @@ class ResumeViewModel extends ChangeNotifier {
     } else {
       atsFeedback = "Poor ATS compatibility - revise resume";
     }
+
+    improvementSuggestions.addAll([
+      "Use standard section headings (Experience, Skills, Education)",
+      "Avoid headers/footers as ATS may skip them",
+      "Use simple fonts like Arial or Calibri",
+    ]);
     notifyListeners();
   }
 

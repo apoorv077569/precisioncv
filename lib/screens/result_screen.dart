@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/resume_viewmodel.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<ResumeViewModel>();
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Analysis Result")),
+      appBar: AppBar(
+        title: const Text("Analysis Result"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 🔢 ATS SCORE CARD
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -18,17 +26,24 @@ class ResultScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
-                  children: const [
-                    Text("ATS SCORE",
-                        style: TextStyle(fontSize: 16)),
-                    SizedBox(height: 8),
+                  children: [
+                    const Text(
+                      "ATS SCORE",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
                     Text(
-                      "82%",
+                      "${vm.atsScore}%",
                       style: TextStyle(
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: _scoreColor(vm.atsScore),
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      vm.atsFeedback,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -37,23 +52,57 @@ class ResultScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            const ListTile(
-              leading: Icon(Icons.check_circle, color: Colors.green),
-              title: Text("Skills section optimized"),
+            // 📌 IMPROVEMENT SUGGESTIONS
+            const Text(
+              "Improvement Suggestions",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
-            const ListTile(
-              leading: Icon(Icons.cancel, color: Colors.red),
-              title: Text("Missing REST API keyword"),
+            const SizedBox(height: 12),
+
+            Expanded(
+              child: vm.improvementSuggestions.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No major issues found 🎉",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: vm.improvementSuggestions.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          leading: const Icon(
+                            Icons.info_outline,
+                            color: Colors.orange,
+                          ),
+                          title: Text(vm.improvementSuggestions[index]),
+                        );
+                      },
+                    ),
             ),
 
-            const ListTile(
-              leading: Icon(Icons.cancel, color: Colors.red),
-              title: Text("Add quantified achievements"),
+            const SizedBox(height: 12),
+
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Analyze Another Resume"),
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// 🎨 Score-based color
+  Color _scoreColor(int score) {
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return Colors.orange;
+    return Colors.red;
   }
 }
