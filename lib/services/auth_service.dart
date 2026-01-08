@@ -1,3 +1,4 @@
+import 'package:precisioncv/services/session_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'hash_helper.dart';
 
@@ -43,5 +44,10 @@ class AuthService {
     if(user == null){
       throw Exception("Insert email or password");
     }
+    // save session
+    await SessionService.saveSession(
+      email: user['email'],
+      name: user['name'],
+    );
   }
 }

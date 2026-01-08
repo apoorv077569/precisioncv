@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:precisioncv/screens/login_screen.dart';
 import 'package:precisioncv/screens/result_screen.dart';
+import 'package:precisioncv/services/session_service.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/resume_viewmodel.dart';
 
@@ -12,7 +14,7 @@ class UploadScreen extends StatelessWidget {
 
     // 🔔 SnackBar listener (fires once per state change)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // upload success 
+      // upload success
       if (vm.uploadStatus == UploadStatus.success) {
         vm.calculateAtsScore();
 
@@ -26,17 +28,32 @@ class UploadScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const ResultScreen()),
         );
       }
-      if(vm.uploadStatus == UploadStatus.error){
+      if (vm.uploadStatus == UploadStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(vm.errorMessage??"Upload Failed"),
-          ),
+          SnackBar(content: Text(vm.errorMessage ?? "Upload Failed")),
         );
         vm.uploadStatus = UploadStatus.idle;
       }
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Upload Resume")),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.logout),
+          tooltip: "Logout",
+          onPressed: () async {
+            await SessionService.clearSession();
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (_) => false,
+            );
+          },
+        ),
+        title: const Text("Upload Resume"),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -44,6 +61,7 @@ class UploadScreen extends StatelessWidget {
           children: [
             const Text(
               "Upload your resume (PDF)",
+              textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 

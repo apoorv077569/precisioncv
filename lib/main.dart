@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:precisioncv/screens/login_screen.dart';
+import 'package:precisioncv/screens/splash_screen.dart';
 import 'package:precisioncv/screens/upload_screen.dart';
 import 'package:precisioncv/viewmodels/resume_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -22,15 +23,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    final session = Supabase.instance.client.auth.currentSession;
-
     return ChangeNotifierProvider(
       create: (_) => ResumeViewModel(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'ATS Resume Analyzer',
+        title: 'PrecisonCV',
         theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-        home: session == null ? const LoginScreen() : const UploadScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
