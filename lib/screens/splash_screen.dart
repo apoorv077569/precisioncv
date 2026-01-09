@@ -14,7 +14,7 @@ class _SplashScreenState extends State<SplashScreen>{
   @override
   void initState(){
     super.initState();
-    Future.delayed(const Duration(seconds: 2),() async {
+    Future.delayed(const Duration(seconds: 3),() async {
       final loggedIn = await SessionService.isLoggedIn();
 
       if(loggedIn){
