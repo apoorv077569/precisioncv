@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:precisioncv/screens/resetpassword_screen.dart';
 
 class OtpVerificationScreen extends StatelessWidget {
   const OtpVerificationScreen({Key? key}) : super(key: key);
@@ -12,20 +13,14 @@ class OtpVerificationScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF1E3A5F),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: const Text(
           '8:38',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: Colors.white, fontSize: 14),
         ),
         centerTitle: false,
       ),
@@ -43,7 +38,7 @@ class OtpVerificationScreen extends StatelessWidget {
                   color: const Color(0xFF1E3A5F),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Image.asset("assets/icon/app_logo.png",width: 120),
+                child: Image.asset("assets/icon/app_logo.png", width: 120),
               ),
               const SizedBox(height: 32),
               // TITLE
@@ -60,20 +55,14 @@ class OtpVerificationScreen extends StatelessWidget {
               const Text(
                 'Enter the security code we sent to',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF666666),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
               ),
               const SizedBox(height: 4),
               // EMAIL
               const Text(
                 'agoorvrathore699@gmail.com',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF666666),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
               ),
               const SizedBox(height: 32),
               // OTP BOXES
@@ -95,7 +84,14 @@ class OtpVerificationScreen extends StatelessWidget {
                 width: 150,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ResetpasswordScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A5F),
                     shape: RoundedRectangleBorder(
@@ -118,18 +114,12 @@ class OtpVerificationScreen extends StatelessWidget {
               // RESEND TEXT
               const Text(
                 "Didn't receive code?",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF666666),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
               ),
               const SizedBox(height: 4),
               const Text(
                 'Resend - 00:42',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF666666),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
               ),
             ],
           ),
@@ -159,9 +149,7 @@ class OtpVerificationScreen extends StatelessWidget {
           counterText: '',
           border: InputBorder.none,
         ),
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-        ],
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       ),
     );
   }
