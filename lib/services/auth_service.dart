@@ -1,6 +1,7 @@
 import 'package:precisioncv/services/session_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'hash_helper.dart';
+import 'package:uuid/uuid.dart'; 
 
 class AuthService {
   final _db = Supabase.instance.client;
@@ -11,7 +12,8 @@ class AuthService {
     required String password,
   }) async{
     final hash = HashHelper.hash(password);
-
+    final uuid = const Uuid().v4();
+    
     final exists = await _db
     .from('profiles')
     .select()
@@ -23,6 +25,7 @@ class AuthService {
     }
     await _db.from('profiles')
     .insert({
+      'id': uuid,
       'name':name,
       'email':email,
       'password':hash,

@@ -20,19 +20,24 @@ class SignupScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.description,
-              size: 50,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            // Icon(
+            //   Icons.description,
+            //   size: 50,
+            //   color: Theme.of(context).colorScheme.primary,
+            // ),
+            Image.asset("assets/icon/app_logo.png", width: 120),
 
             const SizedBox(height: 16),
 
             const Text(
-              "ATS Resume Analyzer",
+              "PrecisionCV",
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-
+            const SizedBox(height: 5),
+            const Text(
+              "Signup",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+            ),
             const SizedBox(height: 30),
 
             TextField(
@@ -76,8 +81,8 @@ class SignupScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             FilledButton(
-              onPressed: () async{
-                try{
+              onPressed: () async {
+                try {
                   await authservice.signup(
                     name: nameController.text.trim(),
                     email: emailController.text.trim(),
@@ -87,11 +92,14 @@ class SignupScreen extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Signup Successfull")),
                   );
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=> const LoginScreen()),
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
                   );
-                }catch(e){
-                  ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content:Text(e.toString())));
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               },
               child: const Text("Signup"),
@@ -110,15 +118,16 @@ class SignupScreen extends StatelessWidget {
                       color: Colors.blueAccent,
                       fontWeight: FontWeight.bold,
                     ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
-                        );
-                      },
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                            );
+                          },
                   ),
                 ],
               ),

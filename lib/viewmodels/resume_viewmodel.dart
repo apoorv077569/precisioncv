@@ -8,8 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 enum UploadStatus { idle, uploading, success, error }
 
 class ResumeViewModel extends ChangeNotifier {
-  File? selectedFile; // Mobile
-  Uint8List? selectedBytes; // Web
+  File? selectedFile; 
+  Uint8List? selectedBytes;
   String? fileName;
   bool readyToUpload = false;
 
@@ -22,14 +22,13 @@ class ResumeViewModel extends ChangeNotifier {
   double uploadProgress = 0.0;
   UploadStatus uploadStatus = UploadStatus.idle;
 
-  static const int maxFileSize = 2 * 1024 * 1024; // 2MB
+  static const int maxFileSize = 2 * 1024 * 1024;
 
   bool isValidResume = false;
   String resumeValidationMessage = "";
 
   List<String> improvementSuggestions = [];
 
-  /// 📄 Pick resume (Web + Mobile safe)
   Future<void> pickResume() async {
     errorMessage = null;
 
