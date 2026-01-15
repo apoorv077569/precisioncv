@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:precisioncv/services/session_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'hash_helper.dart';
 import 'package:uuid/uuid.dart'; 
+import 'package:http/http.dart' as http;
 
 class AuthService {
   final _db = Supabase.instance.client;
+  // ignore: constant_identifier_names
+  static const BASE_URL = "https://precisioncv-backend.onrender.com";
 
   Future<void> signup({
     required String name,
@@ -31,6 +36,7 @@ class AuthService {
       'password':hash,
     });
   }
+
   Future<void> login({
     required String email,
     required String password,
@@ -52,5 +58,44 @@ class AuthService {
       email: user['email'],
       name: user['name'],
     );
+  }
+
+  Future<void> sendOtp(String email) async{
+    final response = await http.post(
+      Uri.parse("$BASE_URL/api/auth/send-otp"),
+      headers: {"Content-Type":"application/json"},
+      body: jsonEncode({"email":email}),
+    );
+    if(response.statusCode != 200){
+      throw Exception(jsonDecode(response.body)["message"]);
+    }
+  }
+
+  Future<void> verifyOtp(String email,String otp) async{
+    final response = await http.post(
+      Uri.parse("$BASE_URL/api/auth/verify-otp"),
+      headers: {"Content-Type":"application/json"},
+      body: jsonEncode({
+        "email":email,
+        "otp":otp
+      }),
+    );
+    if(response.statusCode != 200){
+      throw Exception(jsonDecode(response.body)["message"]);
+    }
+  }
+
+  Future<void> resetPassword(String email,String newPassword) async{
+    final response = await http.post(
+      Uri.parse("$BASE_URL/api/auth/reset-password"),
+      headers: {"Content-Type":"application/json"},
+      body: jsonEncode({
+        "email":email,
+        "new_password":newPassword,
+      }),
+    );
+    if(response.statusCode != 200){
+      throw Exception(jsonDecode(response.body)["message"]);
+    }
   }
 }
